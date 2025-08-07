@@ -26,18 +26,17 @@ client.on('messageCreate', async message => {
     const command = args.shift().toLowerCase();
     const serverQueue = queue.get(message.guild.id);
 
-    // === Perintah PLAY ===
+    // === PLAY ===
     if (command === 'play') {
         if (!message.member.voice.channel) return message.reply('🔊 Join voice channel dulu!');
         const songArg = args.join(' ');
 
-        // Mode Dynamic: URL video tunggal
+        // Dynamic Mix Mode → jika URL adalah video
         if (play.yt_validate(songArg) === 'video') {
-            startDynamicMixMode(message, songArg);
-            return;
+            return startDynamicMixMode(message, songArg);
         }
 
-        // Mode Static: Playlist default / playlist custom
+        // Static Mode → Playlist default atau playlist custom
         let songList = [];
         if (songArg.includes('list=')) {
             const playlist = await ytpl(songArg, { limit: 100 });
@@ -88,13 +87,14 @@ client.on('messageCreate', async message => {
         }
     }
 
-    // === Perintah Musik Lainnya ===
+    // === SKIP ===
     if (command === 'skip') {
         if (!serverQueue) return message.reply('⛔ Tidak ada lagu.');
         serverQueue.player.stop();
         message.channel.send('⏭️ Lagu dilewati.');
     }
 
+    // === STOP ===
     if (command === 'stop') {
         if (!serverQueue) return message.reply('⛔ Tidak ada lagu.');
         serverQueue.songs = [];
@@ -103,18 +103,21 @@ client.on('messageCreate', async message => {
         message.channel.send('🛑 Pemutaran dihentikan.');
     }
 
+    // === PAUSE ===
     if (command === 'pause') {
         if (!serverQueue) return;
         serverQueue.player.pause();
         message.channel.send('⏸️ Lagu dijeda.');
     }
 
+    // === RESUME ===
     if (command === 'resume') {
         if (!serverQueue) return;
         serverQueue.player.unpause();
         message.channel.send('▶️ Lanjutkan lagu.');
     }
 
+    // === QUEUE ===
     if (command === 'queue') {
         if (!serverQueue) return message.reply('Tidak ada antrian.');
         if (serverQueue.mode === 'static') {
@@ -126,12 +129,14 @@ client.on('messageCreate', async message => {
         }
     }
 
+    // === LOOP ===
     if (command === 'loop') {
         if (!serverQueue) return;
         serverQueue.loop = !serverQueue.loop;
         message.channel.send(`🔁 Loop ${serverQueue.loop ? 'aktif' : 'nonaktif'}.`);
     }
 
+    // === CLEAR ===
     if (command === 'clear') {
         if (!serverQueue) return;
         serverQueue.songs = [serverQueue.songs[0]];
@@ -139,7 +144,7 @@ client.on('messageCreate', async message => {
     }
 });
 
-// === Mode Static Playlist ===
+// === STATIC PLAYLIST MODE ===
 async function playStaticSong(guild, song, message) {
     const serverQueue = queue.get(guild.id);
     if (!song) {
@@ -174,7 +179,7 @@ async function playStaticSong(guild, song, message) {
     }
 }
 
-// === Mode Dynamic Mix Playlist (RapidAPI) ===
+// === DYNAMIC MIX MODE ===
 async function startDynamicMixMode(message, videoUrl) {
     const videoId = await play.get_video_basic_info(videoUrl).then(info => info.video_details.id);
     const mixList = await getMixPlaylist(videoId);
@@ -248,7 +253,7 @@ async function playMixSong(guild, message) {
     }
 }
 
-// Ambil semua lagu dari Mix Playlist via RapidAPI
+// === RAPIDAPI GET MIX PLAYLIST ===
 async function getMixPlaylist(videoId) {
     const playlistId = `RD${videoId}`;
     const url = `https://youtube-v31.p.rapidapi.com/playlistItems?playlistId=${playlistId}&part=snippet&maxResults=50`;

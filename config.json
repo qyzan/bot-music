@@ -1,7 +1,8 @@
 {
-  "token": "MTQwMTYwNTYyNDIwMjI2ODg4NA.GyZ2Ou.00IiHwbdMkp0MEtxCjVl_mUOSSWtHYkKHmrlFA",
+  "token": "token",
   "prefix": "!",
   "defaultPlaylist": "https://www.youtube.com/playlist?list=PLQ5PRE9uYK9L5-zSbCM1mFWsCZMuCm5ib",
-  "rapidApiKey":"abed853183msh31fb34fc30c6509p1c243djsnc65b38675784",
-  "serpApiKey":"7477299f2d81842120e95f7d80d8532fb9981bed1b0e40b5636b242b8a5e2db7"
+  "rapidApiKey":"token",
+  "serpApiKey":"token"
+
 }

@@ -181,38 +181,44 @@ async function playStaticSong(guild, song, message) {
 
 // === DYNAMIC MIX MODE ===
 async function startDynamicMixMode(message, videoUrl) {
-    const videoId = await play.get_video_basic_info(videoUrl).then(info => info.video_details.id);
-    const mixList = await getMixPlaylist(videoId);
+    try {
+        const videoInfo = await play.video_info(videoUrl);
+        const videoId = videoInfo.video_details.id; // Get the video ID from the video info
+        const mixList = await getMixPlaylist(videoId);
 
-    if (!mixList || mixList.length === 0) {
-        return message.channel.send('⚠️ Tidak bisa memuat Mix Playlist.');
+        if (!mixList || mixList.length === 0) {
+            return message.channel.send('⚠️ Tidak bisa memuat Mix Playlist.');
+        }
+
+        const queueConstruct = {
+            voiceChannel: message.member.voice.channel,
+            connection: null,
+            player: null,
+            songs: mixList,
+            mixIndex: 0,
+            playing: true,
+            loop: false,
+            mode: 'mix',
+            currentVideo: null
+        };
+
+        queue.set(message.guild.id, queueConstruct);
+
+        const connection = joinVoiceChannel({
+            channelId: message.member.voice.channel.id,
+            guildId: message.guild.id,
+            adapterCreator: message.guild.voiceAdapterCreator
+        });
+
+        queueConstruct.connection = connection;
+        queueConstruct.player = createAudioPlayer();
+        connection.subscribe(queueConstruct.player);
+
+        playMixSong(message.guild, message);
+    } catch (err) {
+        console.error(`❌ Gagal mendapatkan informasi video: ${err.message}`);
+        message.channel.send('⚠️ Gagal memuat informasi video.');
     }
-
-    const queueContruct = {
-        voiceChannel: message.member.voice.channel,
-        connection: null,
-        player: null,
-        songs: mixList,
-        mixIndex: 0,
-        playing: true,
-        loop: false,
-        mode: 'mix',
-        currentVideo: null
-    };
-
-    queue.set(message.guild.id, queueContruct);
-
-    const connection = joinVoiceChannel({
-        channelId: message.member.voice.channel.id,
-        guildId: message.guild.id,
-        adapterCreator: message.guild.voiceAdapterCreator
-    });
-
-    queueContruct.connection = connection;
-    queueContruct.player = createAudioPlayer();
-    connection.subscribe(queueContruct.player);
-
-    playMixSong(message.guild, message);
 }
 
 async function playMixSong(guild, message) {

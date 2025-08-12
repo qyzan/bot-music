@@ -1,0 +1,8 @@
+{
+  "token": "token_bot_discord",
+  "prefix": "!",
+  "defaultPlaylist": "https://www.youtube.com/playlist?list=PL...",
+  "rapidApiKey":"API",
+  "serpApiKey":"API",
+  "youtubeApiKey":"API"
+}
